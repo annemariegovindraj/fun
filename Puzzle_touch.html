@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+</head>
+<body>
+<div id="the_div">
+<canvas id="big"></canvas>
+</div>
+
+<script src="Mouldpiece.js"></script>
+<script src="Puzzle_touch.js" ></script>
+<script >
+	var imgsource ="butterfly.png";
+	
+	var nbcolumns=6;
+	var nbrows=4;
+	window.addEventListener("load",function(){Puzzle.firstimgloading(imgsource,nbcolumns,nbrows,Puzzle.initialize);});
+
+</script> 
+</body>
+</html>

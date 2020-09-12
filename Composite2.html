@@ -1,0 +1,192 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+</head>
+<body>
+<div id="the_div">
+<canvas id="big" width="1200" height="700"></canvas>
+</div>
+
+<script> //src="Picture.js">
+ ////draws mouldpiece from arrays and composite with picture 
+///safe copy of composite1.html working on 14/8/2020, with mouldpiece7.js  or Mouldpiece8.js
+///to do :adapt arraypicking of Mouldpiece6.html to puzzle of Composite7.html 
+canvas1=document.createElement("canvas"); 
+canvas2=document.createElement("canvas"); 
+var Pictpieces=Array(6);
+var Pieces=Array(6);
+var moulds=Array(6);
+var imginfo= new function(){
+		this.load=function(imgsource,callback){
+				this.image=new Image();
+				this.image.src=imgsource;
+				console.log(imgsource);///he says jpg , i asked png
+				this.image.onload=callback; //function(){nbitems=callback;}
+				}
+		this.getimgw=function(){
+				return this.image.width;}
+		this.getimgh=function(){
+				return this.image.height;}
+		this.draw=function(pctx,i){console.log("drawing piece "+i);
+				//this.context=Pictpieces[i].getContext('2d');
+				//this.context.clearRect(0,0,canvas2.width,canvas2.height);
+				pctx.drawImage(this.image,5*Puzzle.xscale*(i%3),5*Puzzle.yscale*Math.floor(i/3),7*Puzzle.xscale,7*Puzzle.yscale,0,0,7*Puzzle.xscale,7*Puzzle.yscale);
+				}
+		}
+
+////mould created from array of functions
+
+
+
+var pickingArrays=new function(){
+	var sign=1;
+	this.arrlengths={sqsqh:10, sqsqv:10,trtrh:8}
+	this.map={sqsqh :function(p,q,ii,xscale,yscale){var arr=[[p,q],[p+xscale,q],[p+xscale,q+yscale*sign],[p+2*xscale,q+yscale*sign],[p+2*xscale,q],[p+3*xscale,q],[p+3*xscale,q+yscale*sign],[p+4*xscale,q+yscale*sign],[p+4*xscale,q],[p+5*xscale,q]]; var x=arr[ii][0];var y=arr[ii][1]; return [x,y];},
+		sqsqv : function(p,q,ii,xscale,yscale){var arr=[[p,q],[p,q+yscale],[p+xscale*sign,q+yscale],[p+xscale*sign,q+2*yscale],[p,q+2*yscale],[p,q+3*yscale],[p+xscale*sign,q+3*yscale],[p+xscale*sign,q+4*yscale],[p,q+4*yscale],[p,q+5*yscale]];var x=arr[ii][0];var y=arr[ii][1]; return [x,y];},
+		trtrh : function(p,q,ii,xscale,yscale){var arr=[[p,q],[p+xscale,q],[p+3*xscale/2,q+yscale*sign],[p+2*xscale,q],[p+3*xscale,q],[p+7*xscale/2,q+yscale*sign],[p+4*xscale,q],[p+5*xscale,q]]; var x=arr[ii][0];var y=arr[ii][1]; return [x,y];}
+	};
+		//sqsqh=Array(10);//2 squares bulging Down from Horizontal line if sign=+1
+			//this.trtrh=Array(8);//2 triangles bulging Down from Horizontal line
+		//this.sqsqv=Array(10);//2 squares bulging right from Vertical line if sign=+1
+	}
+
+var MouldPiece=function(xscale,yscale,whpuz){
+	this.mcanvas=document.createElement("canvas"); 
+	this.mcanvas.height=7*xscale;
+	this.mcanvas.width=7*yscale;
+	
+	this.xscale=xscale;
+	this.yscale=yscale;
+	sign=1;
+	var puz=Array(3);
+	puz[0]=['sqsqh','sqsqv','trtrh','sqsqv'];//hlsq1,vlsq2,hlsq2,vlsq1];
+	//pickingArrays.init(this.xscale, this.yscale);
+
+	//document.getElementById("the_div").appendChild(this.canvas);
+	
+//this.drawingpath=function(canvas,whpuz){
+	//var	path3=[hlsq1,vlsq2,hlsq2,vlsq1];
+	this.ctx=this.mcanvas.getContext('2d');
+	this.ctx.beginPath();
+	this.ctx.strokeStyle="black";
+	this.ctx.fillStyle="rgba(255,0,0,1)";
+	path=Array(4);
+	path=puz[whpuz];//the 4 contour lines
+	//console.log(path);
+	//var nextLine=Array();
+	//console.log(nextLine);//var scale= this.W/5;
+	var Po=10;
+	var Qo=10;
+	this.ctx.moveTo(Po,Qo);//nextLine[0][0], nextLine[0][1]);
+	//this.ctx.moveTo(nextLine[0][0], nextLine[0][1]);
+	for (var j=0; j<4; j++){
+		switch(j){
+		 case 0 : p=Po; q=Qo;
+		 
+		 break;
+		 case 1 : p=Po+5*this.xscale; q=Qo;
+		  break;
+		 case 2 : p=Po; q=Qo+5*this.yscale;
+		 break;
+		 case 3 : p=Po; q=Qo;
+		 break;
+		 default : alert("p,q ?");
+		 }
+		//if((j==0)||(j==1)) {nextLine=path[j];}
+		//else if((j==2)||(j==3)) {nextLine=path[j].reverse();}
+		var name=path[j];
+		var n=pickingArrays.arrlengths[name];
+		//var n=(path[j]).length;
+		console.log(path[j], n);///path[j] is a string not array!!!
+		for (var i=0; i<n; i++){
+			var pt=Array(2);	
+			if ((j==0)||(j==1)){pt=pickingArrays.map[name](p,q,i,this.xscale,this.yscale);}
+			else {pt=pickingArrays.map[name](p,q,n-i-1,this.xscale,this.yscale);}
+			//var yy=pickingArrays('sqsqh',i,p,q,this.xscale,this.yscale);
+			console.log("x: "+pt[0], "y:"+pt[1]);		
+			this.ctx.lineTo(pt[0], pt[1]);
+			//ctx.lineTo(xx,yy);//, nextLine[i][1]);
+				//console.log(nextLine[i][0],nextLine[i][1]);
+			}
+	}
+	//this.ctx.closePath();
+	this.ctx.stroke();
+	this.ctx.fill();
+	//canvas.style.display="none";
+	//return this.mcanvas;
+	}
+			
+var Composite= function(Cctx,i){
+
+	//Cctx=acanvas.getContext('2d');
+			//imginfo.draw(Picture.ctx,0,0);
+		//Picture.ctx.globalCompositeOperation="destination-in";
+
+		Cctx.drawImage(moulds[i].mcanvas,0,0);
+		Cctx.globalCompositeOperation="source-in";
+		Cctx.drawImage(Pictpieces[i].pcanvas,0,0);
+		//return acanvas;
+		}
+Pcanvas= function(i){	
+	this.pcanvas=document.createElement("canvas"); 
+	this.pcanvas.height=7*Puzzle.xscale;
+	this.pcanvas.width=7*Puzzle.yscale;
+	
+	//var row=Math.floor(i/3);
+	//this.pcanvas.style.top=220*row+"px";
+	//var coll=i%3;
+	//this.pcanvas.style.left=200*coll+"px";
+	
+	//document.getElementById("the_div").appendChild(this.pcanvas);
+	}
+	
+var Puzzle=new function(){
+	this.bigcanvas=document.getElementById("big");
+	this.ctx=this.bigcanvas.getContext("2d");
+	this.initialize=function(imgsource, callback){
+			//imgsource="mychildren.png";
+//for canvas 3 x 2 , divide height by 10, width by 15, roud off	
+	this.xscale=38;
+	this.yscale=43;
+	//	w=50;
+	//	h=50;
+		//canvas1.height=this.yscale*7;
+		//canvas1.width=this.xscale*7; ///only for cutting time
+		//MouldPiece(canvas1,this.xscale,this.yscale);
+		
+		for(var i=0;i<6;i++){
+			moulds[i]= new MouldPiece(this.xscale,this.yscale, 0)//0 for now
+			//document.getElementById("the_div").appendChild(moulds[i].mcanvas);
+			Pictpieces[i]=new Pcanvas(i);
+			Pieces[i]=new Pcanvas(i);}
+		console.log(Pictpieces[2]);
+			//canvas2=document.createElement("canvas"); 
+		canvas2.height=7*this.yscale;
+		canvas2.width=7*this.xscale; //scale*5*Math.round(w/5);
+		imginfo.load(imgsource,callback);
+		}
+	this.draw=function(){
+		/*for(var i=0;i<3;i++){
+		window.setTimeout(function(){imginfo.draw(i);
+									Composite(Pictpieces[i],i);
+									
+									},20+10*i);*/
+		for(var i=0;i<6;i++){
+			var y=220*Math.floor(i/3);
+			var x=(i%3)*200;
+			imginfo.draw(Pictpieces[i].pcanvas.getContext("2d"),i);
+			Composite(Pieces[i].pcanvas.getContext('2d'),i);
+			
+		Puzzle.ctx.drawImage(Pieces[i].pcanvas,x,y);
+		}
+		//document.getElementById("the_div").appendChild(canvas1);
+	//document.getElementById("the_div").appendChild(canvas2);
+	}
+	
+	}
+
+window.addEventListener("load",function(){Puzzle.initialize("butterfly.png",Puzzle.draw)});
+</script>
+
+</body>
+</html>
