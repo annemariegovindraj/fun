@@ -16,8 +16,10 @@
 
 you may contact me at annemarie.govindraj@gmail.com
 */
+
+
 //////draws puzzlepiece from arrays in mouldpiece and picture and  allows to select and drag  
-///z values, for selecting piece  not for drawing
+/// and when appropriately dropped connect to other pieces
 var Pictpieces=null;//=Array();
 var Pieces=null;//Array();
 var moulds=Array();
@@ -25,7 +27,7 @@ var imginfo= new function(){
 		this.load=function(imgsource,callback){
 				this.image=new Image();
 				this.image.src=imgsource;
-				console.log(imgsource);
+				//console.log(imgsource);
 				this.image.onload=callback; //function(){nbitems=callback;}
 				}
 		this.getimgw=function(){
@@ -53,10 +55,6 @@ var imginfo= new function(){
 	}			
 var Composite= function(Cctx,i){
 
-	//Cctx=acanvas.getContext('2d');
-			//imginfo.draw(Picture.ctx,0,0);
-		//Picture.ctx.globalCompositeOperation="destination-in";
-
 		Cctx.drawImage(moulds[i].mcanvas,0,0);
 		Cctx.globalCompositeOperation="source-in";
 		Cctx.drawImage(Pictpieces[i].pcanvas,0,0);
@@ -79,7 +77,6 @@ class Group {
 		else {this.leaderr=ps;}
 		this.Content.push(ps); 
 		this.Content.push(target);
-		//console.log("leader "+this.leaderr+ "target"+target); // OK
 				}
 	getContent=function(){
 		return this.Content;
@@ -129,20 +126,13 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 		}
 	
 	this.initialize=function(){
-			//imgsource="mychildren.png";
-//for canvas 3 x 2 , divide height by 10, width by 15, round off	
-	
 	var w=imginfo.getimgw();
 	var h=imginfo.getimgh(h);
-	//console.log("w/h"+w+","+h);//ok
 	Puzzle.zs=Array(Puzzle.nbofpieces);
 	for(var i=0;i<Puzzle.nbofpieces;i++){
 		Puzzle.zs[i]=3;}//stand-alone pieces get z value of 3
 	Puzzle.xscale=Math.floor(w/(5*Puzzle.nbofcols));
 	Puzzle.yscale=Math.floor(h/(5*Puzzle.nbofrows));
-	//console.log(Puzzle.xscale, Puzzle.yscale);//,this.nbofcols);//=nbcolumns;
-	//this.nbofrows=nbrows;
-	//this.nbofpieces=nbcolumns*nbrows;
 	Puzzle.widthofpieces=Array(Puzzle.nbofpieces);
 	Puzzle.heightofpieces=Array(Puzzle.nbofpieces);
 	for(var i=0;i<Puzzle.nbofpieces;i++){
@@ -169,9 +159,6 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 			Pieces[i]=new Pcanvas(i);
 			Pictpieces[i]=new Pcanvas(i);
 			}
-			//canvas2=document.createElement("canvas"); 
-		//canvas2.height=7*this.yscale;
-		//canvas2.width=7*this.xscale; //scale*5*Math.round(w/5);
 		Puzzle.locationsx=Array(Puzzle.nbofpieces);
 		Puzzle.locationsy=Array(Puzzle.nbofpieces);
 		for(var i=0;i<Puzzle.nbofpieces;i++){
@@ -183,22 +170,11 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 			Puzzle.draw();
 		}
 	this.draw=function(){
-		/*for(var i=0;i<3;i++){
-		window.setTimeout(function(){imginfo.draw(i);
-									Composite(Pictpieces[i],i);
-									
-									},20+10*i);*/
 		for(var i=0;i<Puzzle.nbofpieces;i++){
-			//var y=300*Math.floor(i/3);
-			//var x=(i%3)*280;
 			imginfo.draw(Pictpieces[i].pcanvas.getContext("2d"),i);
 			Composite(Pieces[i].pcanvas.getContext('2d'),i);
-			
-		Puzzle.ctx.drawImage(Pieces[i].pcanvas,Puzzle.locationsx[i], Puzzle.locationsy[i]);
+			Puzzle.ctx.drawImage(Pieces[i].pcanvas,Puzzle.locationsx[i], Puzzle.locationsy[i]);
 		}
-	
-		//document.getElementById("the_div").appendChild(canvas1);
-	//document.getElementById("the_div").appendChild(canvas2);
 	}
 	
 	this.findGroup=function(target, ps){
@@ -243,14 +219,10 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 					else{
 				///if target in existing group 
 					var bool1=false,bool2=true;
-						//console.log(Puzzle.grps[g].Content);
 						bool1=Puzzle.grps[g].doesContain(target);
-						//console.log("Group"+g+"contains?"+target +" "+bool1);
 						bool2=Puzzle.grps[g].doesContain(ps);
-						//console.log("Group"+g+"contains?"+ps +" "+bool2);
 						if((bool1==true)&&(bool2==false)){
-							//console.log("foundgroup "+g);//Puzzle.grps[g].addmember(Puzzle.pieceselected);//not here
-							return g;
+						return g;
 							}
 						}
 					
@@ -262,10 +234,9 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 		Puzzle.pieceselect=false;
 		Puzzle.pieceselected=-1;
 		Puzzle.groupdragged=-1;
-		Puzzle.touch=event.touches[0];
-		var nx=event.touches[0].pageX;
-		var ny=event.touches[0].pageY;
-				for( var i=0; i<Puzzle.nbofpieces;i++){
+		var nx=event.pageX; //var nxx=event.clientX;
+		var ny=event.pageY; //var nyy=event.clientY;
+		for( var i=0; i<Puzzle.nbofpieces;i++){
 			if(Puzzle.zs[i]!=3) continue;
 			else if((ny>Puzzle.locationsy[i])&&(ny<(Puzzle.locationsy[i]+Puzzle.heightofpieces[i]))&&(nx>Puzzle.locationsx[i])&&(nx<(Puzzle.locationsx[i]+Puzzle.widthofpieces[i]))){
 					Puzzle.pieceselected=i;
@@ -304,33 +275,15 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 							}
 						}
 					}///clicked not on this peice
-				
-					}//clicked middle of nowhere
+						}//clicked middle of nowhere
 				}
 			}
 		
 	
-	this.drag=function(event){ 
-		event.preventDefault();///to stop the browser from scrolling or whatever, do preventDefault
-		if((Puzzle.pieceselect===true)||(Puzzle.grpselect==true)){
-		//if(((event.touches[0].pageX-Puzzle.offsetx)>=0)&&((event.touches[0].pageX+6*Puzzle.xscale)<=Puzzle.bigcanvas.width)){
-			Puzzle.locationsx[Puzzle.pieceselected]=(event.touches[0].pageX-Puzzle.offsetx);
-		//	}
-		//else if((event.touches[0].pageX+6*Puzzle.xscale)>Puzzle.bigcanvas.width){
-		//	Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.bigcanvas.width-6*Puzzle.xscale;
-		//	}
-		//else if((event.touches[0].pageX-Puzzle.offsetx)<0){
-		//	Puzzle.locationsx[Puzzle.pieceselected]=0;
-		//	}
-		//if(((event.touches[0].pageY-Puzzle.offsety)>=0)&&((event.touches[0].pageY+6*Puzzle.yscale)<=Puzzle.bigcanvas.height)){
-			Puzzle.locationsy[Puzzle.pieceselected]=(event.touches[0].pageY-Puzzle.offsety);
-		//	}
-		//else if((event.touches[0].pageY-Puzzle.offsety)<0){
-		//	Puzzle.locationsy[Puzzle.pieceselected]=0;
-			//}
-	//	else if((event.touches[0].pageY-Puzzle.offsety+6*Puzzle.yscale)>Puzzle.bigcanvas.height){
-		//	Puzzle.locationsy[Puzzle.pieceselected]=Puzzle.bigcanvas.height-6*Puzzle.yscale;
-		//	}
+	this.drag=function(event){ event.preventDefault();
+		if((Puzzle.pieceselect==true)||(Puzzle.grpselect===true)){
+			Puzzle.locationsx[Puzzle.pieceselected]=(event.pageX-Puzzle.offsetx);
+			Puzzle.locationsy[Puzzle.pieceselected]=(event.pageY-Puzzle.offsety);
 		if(Puzzle.pieceselect===true){
 			//console.log("location "+Puzzle.locationsx[Puzzle.pieceselected]+","+Puzzle.locationsy[Puzzle.pieceselected]);
 			Puzzle.ctx.clearRect(0,0,Puzzle.bigcanvas.width, Puzzle.bigcanvas.height);  
@@ -339,8 +292,6 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 		else if (Puzzle.groupdragged>=0){
 			var deltax=Puzzle.locationsx[Puzzle.pieceselected]-Puzzle.oldlocationsx.get(Puzzle.pieceselected);
 			var deltay=Puzzle.locationsy[Puzzle.pieceselected]-Puzzle.oldlocationsy.get(Puzzle.pieceselected);
-			//console.log("deltas "+deltax+" , "+deltay);//ok
-			
 			var cont=Puzzle.grps[Puzzle.groupdragged].Content;
 			//for (var pp=0; pp<cont.length; p++){
 			for (var piec in cont){		
@@ -348,53 +299,50 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 					//console.log(Puzzle.locationsx[Puzzle.grps[Puzzle.groupdragged].Content[piec]]);
 				Puzzle.locationsy[cont[piec]]=Puzzle.oldlocationsy.get(cont[piec])+deltay;;
 				}
+			/*for (var pp=0; pp<cont.length; p++){//Puzzle.grps[Puzzle.groupdragged].Content.length; p++){
+				Puzzle.locationsx[Puzzle.grps[Puzzle.groupdragged].Content[pp]]=Puzzle.oldlocationsx.get(Puzzle.grps[Puzzle.groupdragged].Content[pp])+deltax;
+				Puzzle.locationsy[Puzzle.grps[Puzzle.groupdragged].Content[pp]]=Puzzle.oldlocationsy.get(Puzzle.grps[Puzzle.groupdragged].Content[pp])+deltay;;
+				}*/
+					
 			Puzzle.ctx.clearRect(0,0,Puzzle.bigcanvas.width, Puzzle.bigcanvas.height);  
 			Puzzle.draw();
-			}
+			} }
 		}
-		}
-	this.checkTarget=function(event){ //console.log();
-		var PosX=(event.changedTouches[0].pageX-Puzzle.offsetx);
-		var PosY=(event.changedTouches[0].pageY-Puzzle.offsety);
-		//alert("dropping"+Match.plateselected=", "+nx+", "+ny); OK
-				Puzzle.locationsx[Puzzle.pieceselected]=PosX;
+	this.checkTarget=function(event){ 
+			var PosX=(event.pageX-Puzzle.offsetx);
+			var PosY=(event.pageY-Puzzle.offsety);
+			Puzzle.locationsx[Puzzle.pieceselected]=PosX;
 			Puzzle.locationsy[Puzzle.pieceselected]=PosY;
 		if(Puzzle.pieceselect==true){
 				var itsgrp=-1;
-				//console.log("dropped "+Puzzle.locationsx[Puzzle.pieceselected]+","+Puzzle.locationsy[Puzzle.pieceselected]);
 				Puzzle.offsetx=0;
 				Puzzle.offsety=0;  
 				var targetL=Puzzle.pieceselected-1; var targetR=Puzzle.pieceselected+1;
 				var targetU=Puzzle.pieceselected-Puzzle.nbofcols; var targetD=Puzzle.pieceselected+Puzzle.nbofcols;
 				///hope no Map needed because proceeding piece per piece
 	////appproach from below
-				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected>=Puzzle.nbofcols)&&(Math.abs(PosY-Puzzle.locationsy[targetU]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale)<10)&&(Math.abs(PosX-Puzzle.locationsx[targetU])<10)){
+				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected>=Puzzle.nbofcols)&&(Math.abs(PosY-Puzzle.locationsy[targetU]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale)<5)&&(Math.abs(PosX-Puzzle.locationsx[targetU])<5)){
 					Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.locationsx[targetU]; //+Puzzle.widthofpieces[])+2*Puzzle.xscale;
 					Puzzle.locationsy[Puzzle.pieceselected]=Puzzle.locationsy[targetU]+Puzzle.heightofpieces[targetU]-2*Puzzle.yscale;
-			//console.log("distx "+Math.abs(PosX-Puzzle.locationsx[targetU])+ " disty "+Math.abs(PosY-Puzzle.locationsy[targetU]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale));console.log("uptarget "+targetU);
 					itsgrp=Puzzle.findGroup(targetU, Puzzle.pieceselected);
 					if(itsgrp>=0){Puzzle.pieceselect=false;	}
 					}
 					////appproach from the right
-				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected%Puzzle.nbofcols!=0)&&(Math.abs(PosY-Puzzle.locationsy[targetL])<10)&&(Math.abs(PosX-Puzzle.locationsx[targetL]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale)<10)){
+				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected%Puzzle.nbofcols!=0)&&(Math.abs(PosY-Puzzle.locationsy[targetL])<5)&&(Math.abs(PosX-Puzzle.locationsx[targetL]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale)<5)){
 					Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.locationsx[targetL]+Puzzle.widthofpieces[targetL]-2*Puzzle.xscale;
 					Puzzle.locationsy[Puzzle.pieceselected]=Puzzle.locationsy[targetL];//Puzzle.heightofpieces[])+2*Puzzle.yscale;
-			//console.log("distx "+(PosX-Puzzle.locationsx[targetL]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale)+ " disty "+Math.abs(PosY-Puzzle.locationsy[targetL]));//console.log("lefttarget "+targetL);
 					itsgrp=Puzzle.findGroup(targetL, Puzzle.pieceselected);
 					if(itsgrp>=0){Puzzle.pieceselect=false;	}
 					}
 					////appproach from top
-				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected<(Puzzle.nbofpieces-Puzzle.nbofcols))&&(Math.abs(PosY+Puzzle.heightofpieces[Puzzle.pieceselected]-2*Puzzle.yscale-Puzzle.locationsy[targetD])<10)&&(Math.abs(PosX-Puzzle.locationsx[targetD])<10)){
-					//console.log("distx "+Math.abs(PosX-Puzzle.locationsx[targetD])+ " disty "+(-PosY+Puzzle.locationsy[targetD]-Puzzle.heightofpieces[Puzzle.pieceselected]+2*Puzzle.yscale));
-					//console.log("downtarget "+targetD);
-					Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.locationsx[targetD];//+Puzzle.widthofpieces[])+2*Puzzle.xscale;
+				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected<(Puzzle.nbofpieces-Puzzle.nbofcols))&&(Math.abs(PosY+Puzzle.heightofpieces[Puzzle.pieceselected]-2*Puzzle.yscale-Puzzle.locationsy[targetD])<5)&&(Math.abs(PosX-Puzzle.locationsx[targetD])<5)){
+						Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.locationsx[targetD];//+Puzzle.widthofpieces[])+2*Puzzle.xscale;
 					Puzzle.locationsy[Puzzle.pieceselected]=Puzzle.locationsy[targetD]-Puzzle.heightofpieces[Puzzle.pieceselected]+2*Puzzle.yscale;
 						itsgrp=Puzzle.findGroup(targetD, Puzzle.pieceselected);
 					if(itsgrp>=0){Puzzle.pieceselect=false;	}
 						}
 					////appproach from left
-				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected%Puzzle.nbofcols<(Puzzle.nbofcols-1))&&(Math.abs(PosY-Puzzle.locationsy[targetR])<10)&&(Math.abs(PosX+Puzzle.widthofpieces[Puzzle.pieceselected]-2*Puzzle.xscale-Puzzle.locationsx[targetR])<10)){
-					//console.log("distx "+(-PosX-Puzzle.widthofpieces[Puzzle.pieceselected]+2*Puzzle.xscale+Puzzle.locationsx[targetR])+ " disty "+Math.abs(PosY-Puzzle.locationsy[targetR]));//console.log("righttarget "+targetR);
+				if((Puzzle.pieceselect==true)&&(Puzzle.pieceselected%Puzzle.nbofcols<(Puzzle.nbofcols-1))&&(Math.abs(PosY-Puzzle.locationsy[targetR])<5)&&(Math.abs(PosX+Puzzle.widthofpieces[Puzzle.pieceselected]-2*Puzzle.xscale-Puzzle.locationsx[targetR])<5)){
 					Puzzle.locationsx[Puzzle.pieceselected]=Puzzle.locationsx[targetR]-Puzzle.widthofpieces[Puzzle.pieceselected]+2*Puzzle.xscale;
 					Puzzle.locationsy[Puzzle.pieceselected]=Puzzle.locationsy[targetR];//+Puzzle.heightofpieces[])+2*Puzzle.yscale;
 					itsgrp=Puzzle.findGroup(targetR, Puzzle.pieceselected);
@@ -403,28 +351,22 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 				Puzzle.pieceselect=false;///no target found
 				}
 		else if(Puzzle.grpselect==true){
-				//console.log(Puzzle.groupdragged);
 				var cont=Puzzle.grps[Puzzle.groupdragged].getContent();
-						//if(cont.length==Puzzle.nbofpieces){alert( "Congratulations, Game over");}
+						if(cont.length==Puzzle.nbofpieces){alert( "Congratulations, Game over");}
 						contlength=Puzzle.grps[Puzzle.groupdragged].Content.length;
-						//console.log("content of grp dragged"+cont+" length "+contlength); //ok
-						var grpfound=false;
+							var grpfound=false;
 						////first look for edge pieces on right edge of groupdragged
 				for (var pp=0; pp<contlength; pp++){
 					var piec=cont[pp];//Puzzle.grps[Puzzle.groupdragged].Content[pp];
-						//console.log(piec);
-									////appproach from the right, piec in grpdragged
+					////appproach from the right, piec in grpdragged
 					if((piec%Puzzle.nbofcols==0)||((Puzzle.grps[Puzzle.groupdragged].doesContain(piec-1))==true)||(grpfound==true)){}
 					else { 
 						var targetL=(piec-1);
-						if((Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetL]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale)<8)&&(Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetL])<8)){
-							//console.log("approaching from right with piec"+piec+" ,targetL"+targetL+",locx "+Puzzle.locationsx[targetL])
+						if((Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetL]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale)<5)&&(Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetL])<5)){
 							var oldlocx=Puzzle.locationsx[targetL];///safe keeping to know where each piece of itsgrp is compared to target
 							var oldlocy=Puzzle.locationsy[targetL];
-							//console.log("send to findgroup");
 							itsgrp=Puzzle.findGroup(targetL, piec);
-							//console.log("itsgrp "+itsgrp);//ok finds correct group
-							///reposition targetpiece
+								///reposition targetpiece
 							Puzzle.locationsy[targetL]=Puzzle.locationsy[piec];
 							Puzzle.locationsx[targetL]=Puzzle.locationsx[piec]-Puzzle.widthofpieces[targetL]+2*Puzzle.xscale;
 							
@@ -432,8 +374,6 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								//all done , locations changed, piece added in group in findgroup, nbgrp not changed
 								}
 							else if(itsgrp>=0){
-								//console.log("will absorb "+Puzzle.grps[itsgrp].Content);
-									
 								var itsgrpcont=Puzzle.grps[itsgrp].getContent();
 								for(var pp=0; pp<itsgrpcont.length; pp++){
 									itsgrppiec=Puzzle.grps[itsgrp].Content[pp];
@@ -448,19 +388,16 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								Puzzle.grps.splice(itsgrp,1);
 								grpfound=true;}
 							}
+							//break;
 							}
 								////appproach from below
 					if(((piec-Puzzle.nbofcols)<0)||(grpfound==true)||((Puzzle.grps[Puzzle.groupdragged].doesContain(piec-Puzzle.nbofcols))==true)){}
 					else { //piec is in groupdragged 
 						var targetU=(piec-Puzzle.nbofcols);
-						//console.log("approaching from below with piec "+piec+"at "+Puzzle.locationsy[piec] +"to "+targetU+" at "+(Puzzle.locationsy[piec]));
-						if((Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetU]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale)<8)&&(Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetU])<8)){
-							//console.log("got target with piec "+piec +"at "+(Puzzle.locationsy[piec])+", targetU="+Puzzle.locationsy[targetU]);
+						if((Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetU]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale)<5)&&(Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetU])<5)){
 							var oldlocx=Puzzle.locationsx[targetU];///safe keeping to know where each piece of itsgrp is compared to target
 							var oldlocy=Puzzle.locationsy[targetU];
-							//console.log("send to findgroup");
 							itsgrp=Puzzle.findGroup(targetU, piec);
-							//console.log("itsgrp "+itsgrp);//ok finds correct group
 							///reposition targetpiece
 							Puzzle.locationsx[targetU]=Puzzle.locationsx[piec];
 							Puzzle.locationsy[targetU]=Puzzle.locationsy[piec]-Puzzle.heightofpieces[targetU]+2*Puzzle.yscale;
@@ -469,18 +406,15 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								//all done , locations changed, piece added in group in findgroup, nbgrp not changed
 								}
 							else if(itsgrp>=0){
-								//console.log(Puzzle.grps[itsgrp].Content);
 								var itsgrpcont=Puzzle.grps[itsgrp].getContent();
 								for(var pp=0; pp<itsgrpcont.length; pp++){
-									itsgrppiec=Puzzle.grps[itsgrp].Content[pp];
-										//console.log(Puzzle.grps[itsgrp].Content);
+										itsgrppiec=Puzzle.grps[itsgrp].Content[pp];
 										var offstx=Puzzle.locationsx[itsgrppiec]-oldlocx;///should give position piece in itsgrp
 										var offsty=Puzzle.locationsy[itsgrppiec]-oldlocy;///should be negative mostly
 										Puzzle.locationsx[itsgrppiec]=Puzzle.locationsx[targetU]+offstx;
 										Puzzle.locationsy[itsgrppiec]=Puzzle.locationsy[targetU]+offsty;
 										Puzzle.grps[Puzzle.groupdragged].addmember(itsgrppiec);
-
-									}
+										}
 								Puzzle.grps.splice(itsgrp,1);
 								grpfound=true; 
 								}
@@ -491,11 +425,13 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 				if((piec>=(Puzzle.nbofpieces-Puzzle.nbofcols))||(grpfound==true)||((Puzzle.grps[Puzzle.groupdragged].doesContain(piec+Puzzle.nbofcols))==true)){}
 				else  {
 					var targetD=(piec+Puzzle.nbofcols);
-					if((Math.abs(-Puzzle.locationsy[piec]+Puzzle.locationsy[targetD]-Puzzle.heightofpieces[piec]+2*Puzzle.yscale)<8)&&(Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetD])<8)){
+					//console.log("approaching from top with piece "+piec+" at "+Puzzle.locationsy[piec]+", to targetD "+ targetD+" at"+Puzzle.locationsy[targetD]);
+					if((Math.abs(-Puzzle.locationsy[piec]+Puzzle.locationsy[targetD]-Puzzle.heightofpieces[piec]+2*Puzzle.yscale)<5)&&(Math.abs(Puzzle.locationsx[piec]-Puzzle.locationsx[targetD])<5)){
 						//console.log("found target with piece "+piec+" at "+Puzzle.locationsy[piec]+", to targetD "+ targetD+" at"+Puzzle.locationsy[targetD]);
 					var oldlocx=Puzzle.locationsx[targetD];///safe keeping to know where each piece of itsgrp is compared to target
 						var oldlocy=Puzzle.locationsy[targetD];
 								itsgrp=Puzzle.findGroup(targetD, piec);
+							//console.log("itsgrp "+itsgrp);
 							///reposition targetpiece
 							Puzzle.locationsx[targetD]=Puzzle.locationsx[piec];
 							Puzzle.locationsy[targetD]=Puzzle.locationsy[piec]+Puzzle.heightofpieces[piec]-2*Puzzle.yscale;
@@ -505,6 +441,7 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								var itsgrpcont=Puzzle.grps[itsgrp].getContent();
 								for(var pp=0; pp<itsgrpcont.length; pp++){
 									itsgrppiec=Puzzle.grps[itsgrp].Content[pp];
+										//console.log(Puzzle.grps[itsgrp].Content);
 										var offstx=Puzzle.locationsx[itsgrppiec]-oldlocx;///should give position piece in itsgrp
 										var offsty=Puzzle.locationsy[itsgrppiec]-oldlocy;
 										Puzzle.locationsx[itsgrppiec]=Puzzle.locationsx[targetD]+offstx;
@@ -515,6 +452,7 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								Puzzle.grps.splice(itsgrp,1);
 								grpfound=true;}
 							}
+							//break;
 						}
 					////appproach from the left, piec in grpdragged
 					if((piec%Puzzle.nbofcols==(Puzzle.nbofcols-1))||(grpfound==true)||((Puzzle.grps[Puzzle.groupdragged].doesContain(piec+1))==true)){}
@@ -522,7 +460,7 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 						var targetR=(piec+1);
 						//console.log("targetR"+targetR+",locx "+Puzzle.locationsx[targetR])
 						//console.log("looking from left with "+piec+ " at "+(Puzzle.locationsx[piec])+",targetR"+Puzzle.locationsx[targetR]);
-						if((Math.abs(-Puzzle.locationsx[piec]+Puzzle.locationsx[targetR]-Puzzle.widthofpieces[piec]+2*Puzzle.xscale)<8)&&(Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetR])<8 )){
+						if((Math.abs(-Puzzle.locationsx[piec]+Puzzle.locationsx[targetR]-Puzzle.widthofpieces[piec]+2*Puzzle.xscale)<5)&&(Math.abs(Puzzle.locationsy[piec]-Puzzle.locationsy[targetR])<5)){
 							var oldlocx=Puzzle.locationsx[targetR];///safe keeping to know where each piece of itsgrp is compared to target
 							var oldlocy=Puzzle.locationsy[targetR];
 							itsgrp=Puzzle.findGroup(targetR, piec);
@@ -549,19 +487,20 @@ this.firstimgloading=function(imgsource,nbcolumns,nbrows,callback){
 								grpfound=true;
 								}
 							}
-							}
+							//break;
+						}
 					}
 				Puzzle.grpselect=false;//no dragging
 				Puzzle.groupdragged=-1;
 				}///else : nothing dropped the piece/group in the middle of nowhere
-				for (var i=0;i<Puzzle.grps.length;i++){console.log("nb of grps"+Puzzle.grps.length+"which "+Puzzle.grps[i].Content);}
+				//for (var i=0;i<Puzzle.grps.length;i++){console.log("nb of grps"+Puzzle.grps.length+"which "+Puzzle.grps[i].Content);}
 				
 			Puzzle.pieceselected=-1;
 			Puzzle.draw();
 			}	
+	this.bigcanvas.addEventListener('mousedown',  this.resolveButton);
+	this.bigcanvas.addEventListener('mousemove', this.drag);
+	this.bigcanvas.addEventListener('mouseup', this.checkTarget);
+	this.bigcanvas.addEventListener('mouseclicked', this.resolveButton);
 		
-	this.bigcanvas.addEventListener('touchstart', this.resolveButton,false);
-	this.bigcanvas.addEventListener('touchmove', this.drag,false);
-	this.bigcanvas.addEventListener('touchend', this.checkTarget,false);
-	this.bigcanvas.addEventListener('touchcancel', this.cancelalltouches,false);///for if finger moves into browser UI
 }
